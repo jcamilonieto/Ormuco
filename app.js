@@ -16,7 +16,7 @@ var path = require('path');
 var connection = mysql.createConnection({
     user: "username",
     password: "password",
-    database: "schema",
+    database: "data",
     host: "localhost",
 });
 
