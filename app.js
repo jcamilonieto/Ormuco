@@ -1,13 +1,3 @@
-/*
-CREATE TABLE `forms` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(200) NOT NULL,
-  `animal` varchar(45) NOT NULL,
-  `color` varchar(45) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `Name_UNIQUE` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-*/
 var mysql = require('mysql');
 var express = require('express');
 var bodyParser = require('body-parser');
