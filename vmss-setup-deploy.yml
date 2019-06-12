@@ -1,0 +1,109 @@
+- hosts: localhost
+  vars:
+    resource_group: Ormuco
+    scaleset_name: OrmucoScaleSet
+    loadbalancer_name: OrmucoLoadBalancer
+    admin_username: ormuco
+    admin_password: "{{ admin_password }}"
+    mysql_root_password: password
+  tasks:
+  - include: get-hosts-tasks.yml
+
+- name: Install Nginx on a scale set
+  hosts: scalesethosts
+  become: yes
+  vars:
+    workspace: ~/src/ormuco
+    admin_username: ormuco
+  tasks:
+- name: Install Git
+      apt: pkg=git state=present update_cache=yes
+
+    - name: Install nginx
+      apt: pkg=nginx state=present update_cache=yes
+
+  - name: Start NGiNX
+    service:
+      name: nginx
+      state: started
+
+    - name: Install Node
+    apt:
+      name: nodejs
+      update_cache: yes
+    - name: Install MySQL
+    apt:
+      name: mysql-server
+      update_cache: yes
+
+  - name: Start mysql
+    service:
+      name: mysql
+      state: started
+    - name: Install npm
+    apt:
+      name: npm
+      update_cache: yes
+  - name: Start the MySQL service
+    sudo: yes
+    service: 
+      name: mysql 
+      state: started
+      enabled: true
+  - name: update mysql root password for all root accounts
+    sudo: yes
+    mysql_user: 
+      name: root 
+      host: "{{ item }}" 
+      password: "{{ mysql_root_password }}"
+      login_user: root
+      login_password: "{{ mysql_root_password }}"
+      check_implicit_admin: yes
+      priv: "*.*:ALL,GRANT"
+    with_items:
+      - "{{ ansible_hostname }}"
+      - 127.0.0.1
+      - ::1
+      - localhost 
+
+# Copy database dump file to remote host and restore it to database 'data'
+- name: Copy database dump file
+  copy:
+    src: data.sql
+    dest: /tmp
+- name: Restore database
+  mysql_db:
+    name: data
+    state: import
+    target: /tmp/data.sql
+
+- name: App | Cloning repos + submodules
+      git: repo=git@github.com:Organisation/{{ item.repo }}.git
+           dest={{ item.dest }}
+           accept_hostkey=yes
+           force=yes
+           recursive=no
+           key_file=/home/user/.ssh/id_rsa.github-{{ item.repo }}
+      with_items:
+        -
+          dest: "{{ destination }}"
+          repo: PrimaryRepo
+        -
+          dest: "{{ destination }}/app/core"
+repo: SubmoduleRepo
+
+
+
+
+# Copy app file to remote host and restore it to database 'data'
+  - name: Copy app to Azure VM
+    copy:
+      src: "{{ workspace }}/ormuco.zip"
+      dest: "/home/{{ admin_username }}/ormuco.zip"
+      force: yes
+      mode: 0755
+
+  - name: Start the application
+    shell: java -jar "/home/{{ admin_username }}/helloworld.jar" >/dev/null 2>&1 &
+    async: 5000
+    poll: 0

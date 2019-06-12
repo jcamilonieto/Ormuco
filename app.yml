@@ -1,0 +1,13 @@
+- hosts: localhost
+  vars:
+    repo_url: https://github.com/jcamilonieto/Ormuco.git
+    workspace: ~/src/app/
+
+  tasks:
+  - name: Git Ormuco test app
+    git:
+      repo: "{{ repo_url }}"
+      dest: "{{ workspace }}"
+
+  - name: Build sample app
+    shell: mvn package chdir="{{ workspace }}/complete"
